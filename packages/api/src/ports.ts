@@ -142,6 +142,8 @@ export interface ModeloRepository {
 
 export interface CarroRepository {
 	create(novo: NovoCarro): Promise<Carro>;
+	listByProprietario(proprietario: string): Promise<readonly Carro[]>;
+	deleteById(id: number): Promise<boolean>;
 }
 
 export interface EstacionamentoRepository {

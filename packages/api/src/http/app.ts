@@ -239,6 +239,21 @@ export function createApp(deps: AppDeps): Express {
 		);
 	});
 
+	app.get('/carros', autenticar(deps.tokenService), async (req, res) => {
+		const auth = autenticado(req, res);
+		if (auth === null) return;
+
+		const carros = await deps.carroService.listar(auth.sub);
+		res.status(200).json(
+			carros.map((carro) => ({
+				id: carro.id,
+				placa: carro.placa,
+				modelo_id: carro.modeloId,
+				proprietario: carro.proprietario,
+			})),
+		);
+	});
+
 	app.post('/carros', autenticar(deps.tokenService), async (req, res) => {
 		const auth = autenticado(req, res);
 		if (auth === null) return;
@@ -259,6 +274,20 @@ export function createApp(deps: AppDeps): Express {
 			modelo_id: carro.modeloId,
 			proprietario: carro.proprietario,
 		});
+	});
+
+	app.delete('/carros/:id', autenticar(deps.tokenService), async (req, res) => {
+		const auth = autenticado(req, res);
+		if (auth === null) return;
+
+		const carroId = Number(req.params.id);
+		if (!Number.isInteger(carroId) || carroId <= 0) {
+			res.status(400).json({ erro: 'id de carro invalido' });
+			return;
+		}
+
+		await deps.carroService.excluir(auth.sub, carroId);
+		res.status(204).send();
 	});
 
 	app.post('/estacionamentos', autenticar(deps.tokenService), async (req, res) => {
